@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/tv_tag"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:layout_gravity="center_horizontal"
+        android:src="@mipmap/tag"/>
+
+    <!--线条部分-->
+    <LinearLayout
+        android:id="@+id/tv_content"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="8dp"
+            android:background="@mipmap/rc_btn_pub_service_enter_hover" />
+
+        <ImageView
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:background="@mipmap/line_arrow_ic" />
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="8dp"
+            android:background="@mipmap/rc_btn_pub_service_enter_hover" />
+    </LinearLayout>
+    <!--文字部分-->
+
+    <TextView
+        android:paddingTop="5dp"
+        android:id="@+id/tv_station"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="1"
+        android:text="宝安体育馆"
+        android:layout_gravity="center_horizontal"
+        android:textColor="@color/black" />
+
+</LinearLayout>

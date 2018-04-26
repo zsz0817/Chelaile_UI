@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.shizhuan.chelaile_ui.MainActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#1296db">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center"
+            android:text="提醒设置"
+            android:textSize="20sp"
+            android:textColor="@color/white"/>
+    </android.support.v7.widget.Toolbar>
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/underline"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/home"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:src="@mipmap/home"
+            android:paddingVertical="5dp"
+            android:contentDescription="首页"
+            android:background="#00000000"/>
+
+        <ImageButton
+            android:id="@+id/map"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:paddingVertical="5dp"
+            android:src="@mipmap/map"
+            android:contentDescription="地图"
+            android:background="#00000000"/>
+
+        <ImageButton
+            android:id="@+id/direction"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:paddingVertical="5dp"
+            android:src="@mipmap/direction"
+            android:contentDescription="换向"
+            android:background="#00000000"/>
+        <ImageButton
+            android:id="@+id/notice"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:src="@mipmap/notice_blue"
+            android:paddingVertical="5dp"
+            android:contentDescription="提醒"
+            android:background="#00000000"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_below="@id/toolbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <RelativeLayout
+            android:id="@+id/Toast"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:layout_marginTop="@dimen/activity_horizontal_margin"
+            android:layout_marginBottom="@dimen/activity_vertical_margin1">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="通知提醒"
+                android:textSize="20sp"
+                android:layout_gravity="center"
+                android:paddingLeft="@dimen/activity_horizontal_margin"/>
+            <Switch
+                android:id="@+id/Toast_choice"
+                android:layout_alignParentRight="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </RelativeLayout>
+
+        <include layout="@layout/view_divider_horizontal" />
+
+        <RelativeLayout
+            android:id="@+id/Voice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:layout_marginBottom="@dimen/activity_vertical_margin1"
+            android:layout_marginTop="@dimen/activity_horizontal_margin">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="声音提醒"
+                android:textSize="20sp"
+                android:layout_gravity="center"
+                android:paddingLeft="@dimen/activity_horizontal_margin"/>
+            <Switch
+                android:id="@+id/Voice_choice"
+                android:layout_alignParentRight="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </RelativeLayout>
+
+        <include layout="@layout/view_divider_horizontal" />
+
+        <RelativeLayout
+            android:id="@+id/Vibration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginBottom="@dimen/activity_vertical_margin1"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:layout_marginTop="@dimen/activity_horizontal_margin">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="震动提醒"
+                android:textSize="20sp"
+                android:layout_gravity="center"
+                android:paddingLeft="@dimen/activity_horizontal_margin"/>
+            <Switch
+                android:id="@+id/Vibration_choice"
+                android:layout_alignParentRight="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </RelativeLayout>
+
+
+    </LinearLayout>
+</RelativeLayout>

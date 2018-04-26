@@ -1,0 +1,43 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 26
+    defaultConfig {
+        applicationId "com.example.shizhuan.chelaile_ui"
+        minSdkVersion 21
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    implementation files('libs/AMap3DMap_5.5.0_AMapNavi_5.4.0_20171107.jar')
+    implementation files('libs/Amap_2DMap_V5.2.0_20170627.jar')
+    implementation files('libs/AMap_Location_V3.6.1_20171012.jar')
+    implementation files('libs/commons-beanutils-1.9.3.jar')
+    implementation files('libs/commons-collections-3.2.1.jar')
+    implementation files('libs/commons-lang-2.5.jar')
+    implementation files('libs/ezmorph-1.0.6.jar')
+    implementation files('libs/json-lib-2.4-jdk15.jar')
+    implementation files('libs/AMap_Search_V5.5.0_20171107.jar')
+    compile 'com.squareup.okhttp:okhttp:2.7.5'
+}
