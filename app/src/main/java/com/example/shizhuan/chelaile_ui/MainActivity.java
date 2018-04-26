@@ -10,9 +10,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.amap.api.maps2d.model.Marker;
-import com.amap.api.navi.AMapNavi;
-import com.amap.api.navi.model.NaviLatLng;
+import com.amap.api.maps.model.Marker;
 import com.amap.api.services.cloud.CloudItem;
 import com.amap.api.services.cloud.CloudItemDetail;
 import com.amap.api.services.cloud.CloudResult;

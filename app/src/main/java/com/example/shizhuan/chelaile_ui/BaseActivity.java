@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.Window;
 import android.widget.Toast;
 
+import com.amap.api.maps.MapView;
 import com.amap.api.navi.AMapNavi;
 import com.amap.api.navi.AMapNaviListener;
 import com.amap.api.navi.AMapNaviView;
@@ -31,7 +32,7 @@ import java.util.List;
 public class BaseActivity extends AppCompatActivity implements AMapNaviListener, AMapNaviViewListener {
 
     protected Station station;
-    protected AMapNaviView mAMapNaviView;
+    protected MapView mapView;
     protected AMapNavi mAMapNavi;
 //    protected NaviLatLng mEndLatlng = new NaviLatLng(40.084894,116.603039);
 //    protected NaviLatLng mStartLatlng = new NaviLatLng(39.825934,116.342972);
@@ -56,13 +57,13 @@ public class BaseActivity extends AppCompatActivity implements AMapNaviListener,
     @Override
     protected void onResume() {
         super.onResume();
-        mAMapNaviView.onResume();
+        mapView.onResume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mAMapNaviView.onPause();
+        mapView.onPause();
 
 //        仅仅是停止你当前在说的这句话，一会到新的路口还是会再说的
 //
@@ -73,7 +74,7 @@ public class BaseActivity extends AppCompatActivity implements AMapNaviListener,
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mAMapNaviView.onDestroy();
+        mapView.onDestroy();
         //since 1.6.0 不再在naviview destroy的时候自动执行AMapNavi.stopNavi();请自行执行
         mAMapNavi.stopNavi();
         mAMapNavi.destroy();

@@ -1,55 +1,39 @@
 package com.example.shizhuan.chelaile_ui;
 
 import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
+import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdate;
+import com.amap.api.maps.CameraUpdateFactory;
+import com.amap.api.maps.model.BitmapDescriptorFactory;
+import com.amap.api.maps.model.CameraPosition;
+import com.amap.api.maps.model.LatLng;
+import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
-import com.amap.api.maps2d.AMap;
-import com.amap.api.maps2d.CameraUpdateFactory;
-import com.amap.api.maps2d.MapView;
-import com.amap.api.maps2d.model.Marker;
-import com.amap.api.maps2d.model.MyLocationStyle;
+import com.amap.api.maps.model.MyLocationStyle;
 import com.amap.api.navi.AMapNavi;
-import com.amap.api.navi.AMapNaviListener;
-import com.amap.api.navi.AMapNaviView;
-import com.amap.api.navi.AMapNaviViewListener;
-import com.amap.api.navi.AMapNaviViewOptions;
-import com.amap.api.navi.AmapNaviPage;
-import com.amap.api.navi.enums.NaviType;
-import com.amap.api.navi.model.AMapNaviCameraInfo;
+import com.amap.api.navi.model.AMapNaviPath;
 import com.amap.api.navi.model.NaviLatLng;
-import com.amap.api.services.cloud.CloudItem;
-import com.amap.api.services.cloud.CloudItemDetail;
-import com.amap.api.services.cloud.CloudResult;
-import com.amap.api.services.cloud.CloudSearch;
-import com.amap.api.services.core.AMapException;
-import com.example.shizhuan.chelaile_ui.entity.CloudOverlay;
+import com.amap.api.navi.view.RouteOverLay;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.amap.api.navi.enums.PathPlanningStrategy.DRIVING_AVOID_CONGESTION;
 
@@ -79,11 +63,26 @@ public class MapActivity extends BaseActivity implements View.OnClickListener,AM
 
     MyLocationStyle myLocationStyle;
 
+    /**
+     * 地图对象
+     */
+    private Marker mStartMarker;
+    private Marker mEndMarker;
     private NaviLatLng sLatLng;//起点
     private NaviLatLng eLatLng; //终点
     private List<Station> currentline = new ArrayList<>();
     NaviLatLng naviLatLng;
     MyApplication application;
+
+    /**
+     * 保存当前算好的路线
+     */
+    private SparseArray<RouteOverLay> routeOverlays = new SparseArray<RouteOverLay>();
+
+    /**
+     * 路线计算成功标志位
+     */
+    private boolean calculateSuccess = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +94,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener,AM
         mAMapNavi = AMapNavi.getInstance(getApplicationContext());
         mAMapNavi.addAMapNaviListener(this);
         MapActivity.this.setTitle("查看地图");
-        mAMapNaviView.onCreate(savedInstanceState);
+        mapView.onCreate(savedInstanceState);
 //        startLocation();
 
     }
@@ -113,7 +112,10 @@ public class MapActivity extends BaseActivity implements View.OnClickListener,AM
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
 
-        mAMapNaviView = (AMapNaviView) findViewById(R.id.mapdetail);
+        mapView = (com.amap.api.maps.MapView) findViewById(R.id.mapdetail);
+        aMap = mapView.getMap();
+        mStartMarker = aMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.mipmap.start))));
+        mEndMarker = aMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.mipmap.end))));
 
         currentline = application.getcurrentline();
         int len = currentline.size();
@@ -135,6 +137,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener,AM
 //        aMap.setInfoWindowAdapter(this);
 //        aMap.setOnInfoWindowClickListener(this);
     }
+
 
     @Override
     public void onClick(View v) {
@@ -222,18 +225,41 @@ public class MapActivity extends BaseActivity implements View.OnClickListener,AM
         int strategy = 0;
         try {
             //再次强调，最后一个参数为true时代表多路径，否则代表单路径
-            strategy = mAMapNavi.strategyConvert(true, false, false, false, false);
+            strategy = mAMapNavi.strategyConvert(true, true, true, false, false);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        mAMapNavi.calculateDriveRoute(sList, eList, mWayPointList, DRIVING_AVOID_CONGESTION);
+        mAMapNavi.calculateDriveRoute(sList, eList, mWayPointList, strategy);
 
     }
 
     @Override
     public void onCalculateRouteSuccess(int[] ids) {
-        super.onCalculateRouteSuccess(ids);
-        mAMapNavi.startNavi(NaviType.EMULATOR);
+        //清空上次计算的路径列表。
+        routeOverlays.clear();
+        HashMap<Integer, AMapNaviPath> paths = mAMapNavi.getNaviPaths();
+        for (int i = 0; i < ids.length; i++) {
+            AMapNaviPath path = paths.get(ids[i]);
+            if (path != null) {
+                drawRoutes(ids[i], path);
+            }
+        }
+    }
+
+    @Override
+    public void onCalculateRouteFailure(int arg0) {
+        calculateSuccess = false;
+        Toast.makeText(getApplicationContext(), "计算路线失败，errorcode＝" + arg0, Toast.LENGTH_SHORT).show();
+    }
+
+    private void drawRoutes(int routeId, AMapNaviPath path) {
+        calculateSuccess = true;
+        aMap.moveCamera(com.amap.api.maps.CameraUpdateFactory.changeTilt(0));
+        RouteOverLay routeOverLay = new RouteOverLay(aMap, path, this);
+        routeOverLay.setTrafficLine(true);
+        routeOverLay.addToMap();
+        routeOverLay.zoomToSpan();
+        routeOverlays.put(routeId, routeOverLay);
     }
 
 

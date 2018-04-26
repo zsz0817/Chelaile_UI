@@ -75,7 +75,7 @@
         android:layout_above="@id/linearLayout"
         android:layout_marginTop="0dp">
 
-        <com.amap.api.navi.AMapNaviView
+        <com.amap.api.maps.MapView
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/mapdetail"
             android:layout_width="fill_parent"
