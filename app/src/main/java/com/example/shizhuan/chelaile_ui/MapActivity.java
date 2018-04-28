@@ -17,10 +17,7 @@ import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdate;
-import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
-import com.amap.api.maps.model.CameraPosition;
-import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.MyLocationStyle;
@@ -34,8 +31,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-
-import static com.amap.api.navi.enums.PathPlanningStrategy.DRIVING_AVOID_CONGESTION;
 
 /**
  * Created by ShiZhuan on 2018/4/24.
@@ -129,13 +124,6 @@ public class MapActivity extends BaseActivity implements View.OnClickListener,AM
             mWayPointList.add(naviLatLng);
         }
 
-//        if (aMap==null) {
-//            aMap = mAMapNaviView.getMap();
-//        }
-//        aMap.setOnMarkerClickListener(this);
-//        aMap.setOnInfoWindowClickListener(this);
-//        aMap.setInfoWindowAdapter(this);
-//        aMap.setOnInfoWindowClickListener(this);
     }
 
 
@@ -158,7 +146,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener,AM
                 overridePendingTransition(0, 0);
                 break;
             case R.id.notice:
-                intent = new Intent(MapActivity.this, OrientationActivity.class);
+                intent = new Intent(MapActivity.this, NoticeActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                 startActivity(intent);
                 overridePendingTransition(0, 0);
@@ -273,6 +261,23 @@ public class MapActivity extends BaseActivity implements View.OnClickListener,AM
 //            finish();
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mapView.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mapView.onPause();
+
+//        仅仅是停止你当前在说的这句话，一会到新的路口还是会再说的
+//
+//        停止导航之后，会触及底层stop，然后就不会再有回调了，但是讯飞当前还是没有说完的半句话还是会说完
+//        mAMapNavi.stopNavi();
     }
 
 //    private void startLocation(){

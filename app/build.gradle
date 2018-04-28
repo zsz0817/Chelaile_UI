@@ -40,4 +40,6 @@ dependencies {
     implementation files('libs/json-lib-2.4-jdk15.jar')
     implementation files('libs/AMap_Search_V5.5.0_20171107.jar')
     compile 'com.squareup.okhttp:okhttp:2.7.5'
+    compile 'com.android.support:recyclerview-v7:26.1.0'
+    compile 'com.mcxiaoke.volley:library:1.0.+@aar'
 }

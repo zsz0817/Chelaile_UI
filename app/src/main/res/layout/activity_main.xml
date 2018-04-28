@@ -12,14 +12,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#1296db">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_gravity="center"
-            android:text="宝安线"
-            android:textSize="20sp"
-            android:textColor="@color/white"/>
 
     </android.support.v7.widget.Toolbar>
 
@@ -48,7 +40,7 @@
                 android:layout_gravity="center_vertical"
                 android:src="@mipmap/arrow"/>
             <TextView
-                android:id="@+id/time"
+                android:id="@+id/destination"
                 android:text="公司"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -75,6 +67,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:background="@color/white"
         android:layout_marginTop="@dimen/activity_vertical_margin"
         android:layout_marginHorizontal="@dimen/activity_horizontal_margin">
         <RelativeLayout
@@ -97,31 +90,93 @@
                 android:text="温馨提醒" />
         </RelativeLayout>
 
-        <TextView
-            android:padding="@dimen/activity_vertical_margin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:background="@color/white"
-            android:text="班车还有8分钟到达" />
+        <LinearLayout
+            android:layout_gravity="center"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <TextView
+                android:paddingTop="@dimen/activity_vertical_margin"
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                android:text="班车还有"/>
+            <TextView
+                android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:background="@color/white"
+                android:textColor="@color/red"
+                android:textStyle="bold"
+                android:text="8" />
+            <TextView
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                android:text="分钟到达"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_gravity="center"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <TextView
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                android:text="距离您还有"/>
+            <TextView
+                android:id="@+id/distance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:background="@color/white"
+                android:textColor="@color/red"
+                android:textStyle="bold"
+                android:text="8" />
+            <TextView
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                android:text="km"/>
+        </LinearLayout>
+
 
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/bus_line"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/Toast"
         android:layout_marginTop="@dimen/activity_vertical_margin"
         android:orientation="vertical">
 
-        <com.example.shizhuan.chelaile_ui.HorizontialListView
+        <android.support.v7.widget.RecyclerView
             android:id="@+id/line_station"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:divider="@null"
-            android:listSelector="@android:color/transparent"></com.example.shizhuan.chelaile_ui.HorizontialListView>
+            android:layout_height="match_parent"
+            android:orientation="horizontal"></android.support.v7.widget.RecyclerView>
+
+        <!--<android.support.v7.app.AlertController.RecycleListView-->
+            <!--android:id="@+id/line_station"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:divider="@null"></android.support.v7.app.AlertController.RecycleListView>-->
+
+        <!--<com.example.shizhuan.chelaile_ui.HorizontialListView-->
+            <!--android:id="@+id/line_station"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:divider="@null"-->
+            <!--android:listSelector="@android:color/transparent"></com.example.shizhuan.chelaile_ui.HorizontialListView>-->
     </LinearLayout>
 
 
@@ -181,5 +236,15 @@
         android:layout_centerVertical="true"
         android:layout_marginStart="15dp"
         app:srcCompat="@mipmap/bus_blue" />
+
+    <android.support.v7.widget.AppCompatSpinner
+        android:id="@+id/spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/line_detail"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="13dp"
+        android:gravity="center_horizontal"
+        android:entries="@array/week"/>
 
 </RelativeLayout>

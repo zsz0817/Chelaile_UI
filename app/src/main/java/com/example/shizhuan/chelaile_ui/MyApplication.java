@@ -1,6 +1,11 @@
 package com.example.shizhuan.chelaile_ui;
 
 import android.app.Application;
+import android.text.TextUtils;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
 
 import java.util.List;
 
@@ -12,6 +17,45 @@ public class MyApplication extends Application {
     private List<Station> list;
     private List<Station> currentline;
     private String bus_line;
+
+    public static final String TAG = MyApplication.class.getSimpleName();
+    private RequestQueue mRequestQueue;
+
+    private static MyApplication mInstance;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mInstance = this;
+    }
+
+    public static synchronized MyApplication getInstance() {
+        return mInstance;
+    }
+
+    public RequestQueue getRequestQueue() {
+        if (mRequestQueue == null) {
+            mRequestQueue = Volley.newRequestQueue(getApplicationContext());
+        }
+        return mRequestQueue;
+    }
+
+
+    public <T> void addToRequestQueue(Request<T> request, String tag) {
+        request.setTag(TextUtils.isEmpty(tag) ? TAG : tag);
+        getRequestQueue().add(request);
+    }
+
+    public <T> void addToRequestQueue(Request<T> request) {
+        request.setTag(TAG);
+        getRequestQueue().add(request);
+    }
+
+    public void cancelPendingRequests() {
+        if (mRequestQueue != null) {
+            mRequestQueue.cancelAll(TAG);
+        }
+    }
 
     public void setlist(List<Station> list){
         this.list = list;

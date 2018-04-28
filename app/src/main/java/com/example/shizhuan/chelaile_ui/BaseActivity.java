@@ -54,22 +54,22 @@ public class BaseActivity extends AppCompatActivity implements AMapNaviListener,
 //        eList.add(mEndLatlng);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mapView.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mapView.onPause();
-
-//        仅仅是停止你当前在说的这句话，一会到新的路口还是会再说的
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+////        mapView.onResume();
+//    }
 //
-//        停止导航之后，会触及底层stop，然后就不会再有回调了，但是讯飞当前还是没有说完的半句话还是会说完
-//        mAMapNavi.stopNavi();
-    }
+//    @Override
+//    protected void onPause() {
+//        super.onPause();
+////        mapView.onPause();
+//
+////        仅仅是停止你当前在说的这句话，一会到新的路口还是会再说的
+////
+////        停止导航之后，会触及底层stop，然后就不会再有回调了，但是讯飞当前还是没有说完的半句话还是会说完
+////        mAMapNavi.stopNavi();
+//    }
 
     @Override
     protected void onDestroy() {
