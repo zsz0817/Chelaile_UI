@@ -14,4 +14,7 @@ public class Constants {
 
     //BC0002-获取位置
     public static String url_getLocation="http://111.230.148.118:8080/BocbusServer/QueryLocation.do?param=";
+
+    //BC0006-获取最近站点
+    public static String url_querystation="http://111.230.148.118:8080/BocbusServer/QueryClosestStation.do?param=";
 }

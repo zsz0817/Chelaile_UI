@@ -2,11 +2,14 @@ package com.example.shizhuan.chelaile_ui;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,6 +23,10 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.amap.api.location.AMapLocation;
+import com.amap.api.location.AMapLocationClient;
+import com.amap.api.location.AMapLocationClientOption;
+import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.model.LatLng;
 import com.example.shizhuan.chelaile_ui.Utils.Constants;
 import com.example.shizhuan.chelaile_ui.http.OkHttpClientManager;
@@ -39,11 +46,12 @@ import java.util.Map;
  * Created by ShiZhuan on 2018/4/24.
  */
 
-public class OrientationActivity extends AppCompatActivity implements View.OnClickListener {
+public class OrientationActivity extends AppCompatActivity implements View.OnClickListener,AMapLocationListener {
     Map<String,Object> map1,map2;
     Map<String,Map<String,Object>> param = new HashMap<>();
 
     private final int MSG_HELLO = 0;
+    private final int MSG_WORLD = 1;
     private static Handler mHandler;
 
     private static int vHeight = -1;
@@ -63,16 +71,37 @@ public class OrientationActivity extends AppCompatActivity implements View.OnCli
     private MyRecyclerAdapter adapter;
     private LinearLayoutManager mLayoutManager;
 
+    //声明mlocationClient对象
+    public AMapLocationClient mlocationClient;
+    //声明mLocationOption对象
+    public AMapLocationClientOption mLocationOption = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_direction);
-        //取得从上一个Activity当中传递过来的Intent对象
-//        Intent intent = getIntent();
-//        //从Intent当中根据key取得value
-//        if (intent != null) {
-//            stationslist = (List<Station>) intent.getSerializableExtra("stations");
-//        }
+        new CustomThread().start();
+
+        mlocationClient = new AMapLocationClient(OrientationActivity.this);
+        //初始化定位参数
+        mLocationOption = new AMapLocationClientOption();
+        //设置定位监听
+        mlocationClient.setLocationListener(this);
+        //检测系统是否打开开启了地理定位权限
+        if (ContextCompat.checkSelfPermission(OrientationActivity.this, android.Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(OrientationActivity.this, new String []{android.Manifest.permission.ACCESS_COARSE_LOCATION},1);
+        }
+        //设置定位模式为高精度模式，Battery_Saving为低功耗模式，Device_Sensors是仅设备模式
+        mLocationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
+        //设置定位间隔,单位毫秒,默认为2000ms
+
+        mLocationOption.setLocationCacheEnable(false);
+        mLocationOption.setOnceLocation(true);
+
+        //设置定位参数
+        mlocationClient.setLocationOption(mLocationOption);
+        mlocationClient.startLocation();
+
         MyApplication application = (MyApplication)this.getApplication();
         stationslist = application.getcurrentline();
         init();
@@ -115,6 +144,7 @@ public class OrientationActivity extends AppCompatActivity implements View.OnCli
         adapter.setOnItemClickListener(new MyRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int Position) {
+                adapter.setSelectItem(Position);
                 SimpleDateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
                 SimpleDateFormat df2 = new SimpleDateFormat("HH:mm:ss");
                 Date date = new Date();
@@ -126,9 +156,9 @@ public class OrientationActivity extends AppCompatActivity implements View.OnCli
                 map1.put("TRATIM",df2.format(date));
                 map1.put("USRNAM","zhou");
                 map2.put("line","1");
+                map2.put("stanum",Position+1);
                 param.put("head",map1);
                 param.put("body",map2);
-                new CustomThread().start();//新建并启动CustomThread实例
                 net.sf.json.JSONArray jsonArray = net.sf.json.JSONArray.fromObject(param);
                 String tmp = jsonArray.toString().substring(1,jsonArray.toString().length()-1);
                 Log.d("Test", "MainThread is ready to send msg:" + tmp);
@@ -184,6 +214,45 @@ public class OrientationActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
+    @Override
+    public void onLocationChanged(AMapLocation aMapLocation) {
+        if (aMapLocation != null) {
+            StringBuffer sb = new StringBuffer();
+            if (aMapLocation.getErrorCode() == 0) {
+                aMapLocation.getLocationType();//获取当前定位结果来源，如网络定位结果，详见定位类型表
+                aMapLocation.getLatitude();//获取纬度
+                aMapLocation.getLongitude();//获取经度
+                aMapLocation.getAccuracy();//获取精度信息
+                try {
+                    SimpleDateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
+                    SimpleDateFormat df2 = new SimpleDateFormat("HH:mm:ss");
+                    Date date = new Date(aMapLocation.getTime());
+                    map1 = new HashMap<>();
+                    map2 = new HashMap<>();
+                    map1.put("TRACDE","BC00006");
+                    map1.put("TRADAT",df1.format(date));
+                    map1.put("TRATIM",df2.format(date));
+                    map1.put("USRNAM","zhou");
+                    map2.put("line","1");
+                    map2.put("toc","1");
+                    map2.put("longitude",aMapLocation.getLongitude());
+                    map2.put("latitude",aMapLocation.getLatitude());
+                    param.put("head",map1);
+                    param.put("body",map2);
+                    net.sf.json.JSONArray jsonArray = net.sf.json.JSONArray.fromObject(param);
+                    String tmp = jsonArray.toString().substring(1,jsonArray.toString().length()-1);
+                    mHandler.obtainMessage(MSG_WORLD, tmp).sendToTarget();//发送消息到CustomThread实例
+                }catch (Exception e){
+                    e.printStackTrace();
+                    Toast.makeText(OrientationActivity.this,e.getMessage(),Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                //显示错误信息ErrCode是错误码，errInfo是错误信息，详见错误码表。
+                //定位失败
+            }
+        }
+    }
+
     public void scrollToMiddle() {
         final int firstPosition = mLayoutManager.findFirstVisibleItemPosition();
         int top = recyclerView.getChildAt(position - firstPosition).getRight();
@@ -210,20 +279,86 @@ public class OrientationActivity extends AppCompatActivity implements View.OnCli
                                 String retcode = head.getString("RTNSTS");
                                 double longitude = body.getDouble("bus_longitude3");
                                 double latitude = body.getDouble("bus_latitude3");
-                                String laststation = body.getString("bus_laststa");//上一站
-                                String nextstation = body.getString("bus_nextsta");//下一站
+                                final String laststation = body.getString("bus_laststa");//上一站
+                                final String nextstation = body.getString("bus_nextsta");//下一站
                                 final String time_value = body.getString("bus_nexttm");//到下一站的时间
                                 final String distance_value = body.getString("bus_nextdis");//到下一站的距离
+                                final String stadis = body.getString("stadis");//到所选站点的距离
+                                final String statime = body.getString("statime");//到所选站点的时间
+
                                 LatLng newLatLng = new LatLng(latitude, longitude);
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        time.setText(Integer.parseInt(time_value)/60+"");
-                                        distance.setText(distance_value);
+                                        if (Integer.parseInt(laststation)==Integer.parseInt(nextstation)){
+                                            adapter.setbusItem(Integer.parseInt(laststation));
+                                        }else {
+                                            adapter.setbusItem(0-Integer.parseInt(laststation));
+                                        }
+                                        time.setText(Integer.parseInt(statime)/60+"");
+                                        distance.setText(stadis);
                                     }
                                 });
 //
                             } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            break;
+                        case MSG_WORLD:
+                            try {
+                                Response response = OkHttpClientManager.getAsyn(Constants.url_querystation + msg.obj);
+                                JSONObject allObject = new JSONObject(response.body().string());
+                                JSONObject head = allObject.getJSONObject("head");
+                                JSONObject line = allObject.getJSONObject("line");
+                                String line_staname = line.getString("line_staname");//最近站点名称
+                                final String line_stanum = line.getString("line_stanum");//最近站点编号
+
+                                SimpleDateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
+                                SimpleDateFormat df2 = new SimpleDateFormat("HH:mm:ss");
+                                Date date = new Date();
+                                df1.format(date);//定位时间
+                                map1 = new HashMap<>();
+                                map2 = new HashMap<>();
+                                map1.put("TRACDE","BC00001");
+                                map1.put("TRADAT",df1.format(date));
+                                map1.put("TRATIM",df2.format(date));
+                                map1.put("USRNAM","zhou");
+                                map2.put("line","1");
+                                map2.put("stanum",line_stanum);
+                                param.put("head",map1);
+                                param.put("body",map2);
+                                net.sf.json.JSONArray jsonArray = net.sf.json.JSONArray.fromObject(param);
+                                String tmp = jsonArray.toString().substring(1,jsonArray.toString().length()-1);
+                                Response response1 = OkHttpClientManager.getAsyn(Constants.url_getLocation + tmp);
+                                JSONObject allObject1 = new JSONObject(response1.body().string());
+                                JSONObject head1 = allObject1.getJSONObject("head");
+                                JSONObject body = allObject1.getJSONObject("body");
+                                String retcode = head1.getString("RTNSTS");
+                                double longitude = body.getDouble("bus_longitude3");
+                                double latitude = body.getDouble("bus_latitude3");
+                                final String laststation = body.getString("bus_laststa");//上一站
+                                final String nextstation = body.getString("bus_nextsta");//下一站
+                                final String time_value = body.getString("bus_nexttm");//到下一站的时间
+                                final String distance_value = body.getString("bus_nextdis");//到下一站的距离
+                                final String stadis = body.getString("stadis");//到所选站点的距离
+                                final String statime = body.getString("statime");//到所选站点的时间
+
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (Integer.parseInt(laststation)==Integer.parseInt(nextstation)){
+                                            adapter.setbusItem(Integer.parseInt(laststation)-1);
+                                        }else {
+                                            adapter.setbusItem(1-Integer.parseInt(laststation));
+                                        }
+                                        time.setText(Integer.parseInt(statime)/60+"");
+                                        distance.setText(stadis);
+                                        adapter.setSelectItem(Integer.parseInt(line_stanum)-1);
+                                        adapter.notifyDataSetChanged();
+                                    }
+                                });
+//
+                            }catch (Exception e){
                                 e.printStackTrace();
                             }
                             break;

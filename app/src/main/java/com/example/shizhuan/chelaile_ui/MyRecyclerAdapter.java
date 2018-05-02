@@ -22,6 +22,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.My
     private List<Station> mDatas;
     private OnItemClickListener mItemClickListener;
     private int selectItem = -1;
+    private int busItem = 0;
 
     private List<Boolean> isClicks;//控件是否被点击,默认为false，如果被点击，改变值，控件根据值改变自身颜色
 
@@ -45,6 +46,10 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.My
     public int getItemCount() {
         // TODO Auto-generated method stub
         return mDatas.size();
+    }
+
+    public void setbusItem(int busItem) {
+        this.busItem = busItem;
     }
 
     public void setSelectItem(int selectItem) {
@@ -75,6 +80,20 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.My
             holder.tv_station.setTextColor(Color.BLACK);
             holder.tv_station.setTextSize(15);
         }
+
+        if (busItem>=0&&busItem==position){
+            holder.bus_arrive.setVisibility(View.VISIBLE);
+            holder.bus_away.setVisibility(View.GONE);
+            holder.arrow.setVisibility(View.GONE);
+        }else if (busItem<0&&Math.abs(busItem)==position){
+            holder.bus_away.setVisibility(View.VISIBLE);
+            holder.bus_arrive.setVisibility(View.GONE);
+            holder.arrow.setVisibility(View.VISIBLE);
+        }else {
+            holder.bus_arrive.setVisibility(View.GONE);
+            holder.bus_away.setVisibility(View.GONE);
+            holder.arrow.setVisibility(View.VISIBLE);
+        }
         //如果设置了回调，则设置点击事件
         if(mItemClickListener != null){
             holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -103,11 +122,15 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.My
 
         private ImageView tv_tag;
         private TextView tv_station;
+        private ImageView bus_arrive,bus_away,arrow;
 
         public MyHolder(View view) {
             super(view);
             tv_tag = (ImageView) view.findViewById(R.id.tv_tag);
             tv_station = (TextView)view.findViewById(R.id.tv_station);
+            bus_arrive = (ImageView)view.findViewById(R.id.bus_arrive);
+            bus_away = (ImageView)view.findViewById(R.id.bus_away);
+            arrow = (ImageView)view.findViewById(R.id.arrow);
         }
 
     }
