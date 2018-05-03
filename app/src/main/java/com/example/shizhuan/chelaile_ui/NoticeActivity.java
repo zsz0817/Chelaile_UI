@@ -4,8 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import java.util.Map;
 
@@ -13,7 +15,10 @@ import java.util.Map;
  * Created by ShiZhuan on 2018/4/24.
  */
 
-public class NoticeActivity extends AppCompatActivity implements View.OnClickListener{
+public class NoticeActivity extends BaseActivity implements View.OnClickListener{
+    //记录用户首次点击返回键的时间
+    private long firstTime = 0;
+
     private ImageButton home,map,direction,notice;
     private Toolbar toolbar;
     private Intent intent;
@@ -64,5 +69,20 @@ public class NoticeActivity extends AppCompatActivity implements View.OnClickLis
 
                 break;
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+            long secondTime = System.currentTimeMillis();
+            if (secondTime - firstTime > 2000) {
+                Toast.makeText(NoticeActivity.this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
+                firstTime = secondTime;
+                return true;
+            } else {
+                removeALLActivity();
+            }
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

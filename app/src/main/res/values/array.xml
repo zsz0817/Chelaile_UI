@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="week">
-        <item >宝安线</item>
-        <item >南山线</item>
+        <item >宝安1线</item>
+        <item >宝安2线</item>
+        <item >深南线</item>
         <item >西丽线</item>
         <item >前海线</item>
         <item >后海线</item>
         <item >滨河线</item>
+        <item >北环线</item>
     </string-array>
 </resources>

@@ -20,10 +20,14 @@ import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,6 +51,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.example.shizhuan.chelaile_ui.Utils.Constants;
+import com.example.shizhuan.chelaile_ui.Utils.KyLoadingBuilder;
 import com.example.shizhuan.chelaile_ui.Utils.Utils;
 import com.example.shizhuan.chelaile_ui.entity.CloudOverlay;
 import com.example.shizhuan.chelaile_ui.http.OkHttpClientManager;
@@ -63,9 +68,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener,
+public class MainActivity extends BaseActivity implements View.OnClickListener,
         CloudSearch.OnCloudSearchListener,AMapLocationListener {
     private String current_station,nearest_station;//当前站点，最近站点
+
+    //记录用户首次点击返回键的时间
+    private long firstTime = 0;
 
     //声明mlocationClient对象
     public AMapLocationClient mlocationClient;
@@ -98,20 +106,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private AppCompatSpinner spinner;
     private ImageButton home,map,direction,notice;
+    private ProgressBar progressBar;
     private RecyclerView recyclerView;
     private TextView time,distance;
     private MyRecyclerAdapter adapter;
     private Toolbar toolbar;
     private Intent intent;
     private Station station;
-    List<Station> stations = new ArrayList<>();
-    String[] stationlist = {"坪洲地铁站","西乡步行街","同仁医院","群贤花园","宝安体育馆","金城名苑","中南花园","甲岸路口","西城上筑","南头","公司"};
 
-    MyApplication application;
+    private KyLoadingBuilder builder;
 
     private LinearLayoutManager mLayoutManager;
-
-    RequestQueue mRequestQueue = MyApplication.getInstance().getRequestQueue();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,34 +144,58 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mlocationClient.setLocationOption(mLocationOption);
         mlocationClient.startLocation();
 
-        application = (MyApplication)this.getApplication();
         initStations();
         bus_line = application.getline();
+        init();
+    }
+
+    /**
+     * 查询当前选择路线站点信息
+     */
+    private void queryStations(){
         mCloudSearch = new CloudSearch(this);// 初始化查询类
         mCloudSearch.setOnCloudSearchListener(this);// 设置回调函数
         CloudSearch.SearchBound bound = new CloudSearch.SearchBound(mLocalCityName);
         try {
-            mQuery = new CloudSearch.Query(Constants.BaoAn, bus_line, bound);
+            mQuery = new CloudSearch.Query(Constants.lineKeys[application.getLine_number()*2], "深圳", bound);
             mCloudSearch.searchCloudAsyn(mQuery);
         } catch (AMapException e) {
             Toast.makeText(MainActivity.this, e.getErrorMessage(),Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
-
-
-        init();
-
-
     }
 
+    /**
+     * 初始化控件
+     */
     private void init(){
+        builder = new KyLoadingBuilder(this);
+        builder.setIcon(R.mipmap.loading);
+        builder.setText("正在加载中...");
+//builder.setOutsideTouchable(false);//点击空白区域是否关闭
+//builder.setBackTouchable(true);//按返回键是否关闭
+//builder.dismiss();//关闭
+//        builder.show();
+        setProgressBarVisibility(true);
         time = (TextView)findViewById(R.id.time);
         distance = (TextView)findViewById(R.id.distance);
         spinner = (AppCompatSpinner)findViewById(R.id.spinner);
+        ArrayAdapter<String> spinneradapter=new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, Constants.ToWorkLines);
+        spinneradapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        //绑定 Adapter到控件
+        spinner .setAdapter(spinneradapter);
+        if (application.getLine_number()!=0){
+            spinner.setSelection(application.getLine_number());
+        }else {
+            spinner.setSelection(0);
+        }
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                adapter.setSelectItem(position);
+                setProgressBarVisibility(true);
+                application.setLine_number(position);
+                currentline.clear();
+                queryStations();
             }
 
             @Override
@@ -203,40 +232,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         adapter.setOnItemClickListener(new MyRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int Position) {
-                adapter.setSelectItem(Position);
-                SimpleDateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
-                SimpleDateFormat df2 = new SimpleDateFormat("HH:mm:ss");
-                Date date = new Date();
-                df1.format(date);//定位时间
-                map1 = new HashMap<>();
-                map2 = new HashMap<>();
-                map1.put("TRACDE","BC00001");
-                map1.put("TRADAT",df1.format(date));
-                map1.put("TRATIM",df2.format(date));
-                map1.put("USRNAM","zhou");
-                map2.put("line","1");
-                map2.put("stanum",Position+1);
-                param.put("head",map1);
-                param.put("body",map2);
-                net.sf.json.JSONArray jsonArray = net.sf.json.JSONArray.fromObject(param);
-                String tmp = jsonArray.toString().substring(1,jsonArray.toString().length()-1);
-                Log.d("Test", "MainThread is ready to send msg:" + tmp);
-                mHandler.obtainMessage(MSG_HELLO, tmp).sendToTarget();//发送消息到CustomThread实例
+                setProgressBarVisibility(true);
+                if ((adapter.getbusItem()<0&&Position<=Math.abs(adapter.getbusItem()))
+                        || (adapter.getbusItem()>=0&&Position<adapter.getbusItem())){
+                    Toast.makeText(MainActivity.this,"班车已路过该站",Toast.LENGTH_SHORT).show();
+                }else {
+                    adapter.setSelectItem(Position);
+                    SimpleDateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
+                    SimpleDateFormat df2 = new SimpleDateFormat("HH:mm:ss");
+                    Date date = new Date();
+                    df1.format(date);//定位时间
+                    map1 = new HashMap<>();
+                    map2 = new HashMap<>();
+                    map1.put("TRACDE","BC00001");
+                    map1.put("TRADAT",df1.format(date));
+                    map1.put("TRATIM",df2.format(date));
+                    map1.put("USRNAM","zhou");
+                    map2.put("line",application.getLine_number()*2+1);
+                    map2.put("stanum",Position+1);
+                    param.put("head",map1);
+                    param.put("body",map2);
+                    net.sf.json.JSONArray jsonArray = net.sf.json.JSONArray.fromObject(param);
+                    String tmp = jsonArray.toString().substring(1,jsonArray.toString().length()-1);
+                    mHandler.obtainMessage(MSG_HELLO, tmp).sendToTarget();//发送消息到CustomThread实例
 
-                position = Position;
-                vHeight = view.getWidth();
+                    position = Position;
+                    vHeight = view.getWidth();
 
-                Rect rect = new Rect();
-                recyclerView.getGlobalVisibleRect(rect);
-                reHeight = rect.right - rect.left - vHeight;
+                    Rect rect = new Rect();
+                    recyclerView.getGlobalVisibleRect(rect);
+                    reHeight = rect.right - rect.left - vHeight;
 
-                // handler.removeCallbacksAndMessages(null);
-                isClick = true;
-                if (vHeight < 0) {
-                    isMove = false;
-                    return;
+                    // handler.removeCallbacksAndMessages(null);
+                    isClick = true;
+                    if (vHeight < 0) {
+                        isMove = false;
+                        return;
+                    }
+                    scrollToMiddle();
                 }
-                scrollToMiddle();
+
             }
         });
         //设置分隔线
@@ -246,11 +281,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initStations(){
-        for(int i=0;i<stationlist.length;i++){
-            Station station = new Station(stationlist[i]);
-            stations.add(station);
-        }
-        application.setlist(stations);
         application.setline("宝安");
     }
 
@@ -316,8 +346,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 return -1;
                             }
                         });
-                        application.setcurrentline(currentline);
                         adapter.notifyDataSetChanged();
+                        setProgressBarVisibility(false);
                     } else {
                         Toast.makeText(this, R.string.no_result,Toast.LENGTH_SHORT).show();
                     }
@@ -358,7 +388,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     map1.put("TRADAT",df1.format(date));
                     map1.put("TRATIM",df2.format(date));
                     map1.put("USRNAM","zhou");
-                    map2.put("line","1");
+                    map2.put("line",application.getLine_number()*2+1);
                     map2.put("toc","1");
                     map2.put("longitude",aMapLocation.getLongitude());
                     map2.put("latitude",aMapLocation.getLatitude());
@@ -389,7 +419,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         case MSG_HELLO:
                             try {
                                 Response response = OkHttpClientManager.getAsyn(Constants.url_getLocation + msg.obj);
-                                JSONObject allObject = new JSONObject(response.body().string());
+                                final JSONObject allObject = new JSONObject(response.body().string());
                                 JSONObject head = allObject.getJSONObject("head");
                                 JSONObject body = allObject.getJSONObject("body");
                                 String retcode = head.getString("RTNSTS");
@@ -401,18 +431,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 final String distance_value = body.getString("bus_nextdis");//到下一站的距离
                                 final String stadis = body.getString("stadis");//到所选站点的距离
                                 final String statime = body.getString("statime");//到所选站点的时间
+                                if (Integer.parseInt(laststation)==Integer.parseInt(nextstation)){
+                                    adapter.setbusItem(Integer.parseInt(laststation)-1);
+                                }else {
+                                    adapter.setbusItem(1-Integer.parseInt(laststation));
+                                }
 
                                 LatLng newLatLng = new LatLng(latitude, longitude);
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        if (Integer.parseInt(laststation)==Integer.parseInt(nextstation)){
-                                            adapter.setbusItem(Integer.parseInt(laststation));
-                                        }else {
-                                            adapter.setbusItem(0-Integer.parseInt(laststation));
-                                        }
                                         time.setText(Integer.parseInt(statime)/60+"");
                                         distance.setText(stadis);
+                                        setProgressBarVisibility(false);
+                                        adapter.notifyDataSetChanged();
+                                        builder.dismiss();
                                     }
                                 });
 //
@@ -439,7 +472,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 map1.put("TRADAT",df1.format(date));
                                 map1.put("TRATIM",df2.format(date));
                                 map1.put("USRNAM","zhou");
-                                map2.put("line","1");
+                                map2.put("line",application.getLine_number()*2+1);
                                 map2.put("stanum",line_stanum);
                                 param.put("head",map1);
                                 param.put("body",map2);
@@ -458,19 +491,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 final String distance_value = body.getString("bus_nextdis");//到下一站的距离
                                 final String stadis = body.getString("stadis");//到所选站点的距离
                                 final String statime = body.getString("statime");//到所选站点的时间
+                                if (Integer.parseInt(laststation)==Integer.parseInt(nextstation)){
+                                    adapter.setbusItem(Integer.parseInt(laststation)-1);
+                                }else {
+                                    adapter.setbusItem(1-Integer.parseInt(laststation));
+                                }
 
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        if (Integer.parseInt(laststation)==Integer.parseInt(nextstation)){
-                                            adapter.setbusItem(Integer.parseInt(laststation)-1);
-                                        }else {
-                                            adapter.setbusItem(1-Integer.parseInt(laststation));
-                                        }
                                         time.setText(Integer.parseInt(statime)/60+"");
                                         distance.setText(stadis);
                                         adapter.setSelectItem(Integer.parseInt(line_stanum)-1);
                                         adapter.notifyDataSetChanged();
+                                        setProgressBarVisibility(false);
+                                        builder.dismiss();
                                     }
                                 });
 //
@@ -483,5 +518,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             };
             Looper.loop();//4、启动消息循环
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+            long secondTime = System.currentTimeMillis();
+            if (secondTime - firstTime > 2000) {
+                Toast.makeText(MainActivity.this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
+                firstTime = secondTime;
+                return true;
+            } else {
+                removeALLActivity();
+            }
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

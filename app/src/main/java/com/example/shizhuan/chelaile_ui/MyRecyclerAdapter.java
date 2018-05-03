@@ -52,8 +52,16 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.My
         this.busItem = busItem;
     }
 
+    public int getbusItem(){
+        return busItem;
+    }
+
     public void setSelectItem(int selectItem) {
         this.selectItem = selectItem;
+    }
+
+    public int getSelectItem() {
+        return selectItem;
     }
 
     @Override
@@ -61,39 +69,74 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.My
     public void onBindViewHolder(final MyHolder holder, final int position) {
         // TODO Auto-generated method stub
         holder.tv_station.setText(mDatas.get(position).getContent());
-        if (selectItem == position) {
+//        if (selectItem == position) {
+//            holder.tv_tag.setSelected(true);
+//            holder.tv_tag.setVisibility(View.VISIBLE);
+//            holder.tv_station.setTextColor(Color.RED);
+//            holder.tv_station.setTypeface(Typeface.DEFAULT_BOLD, Typeface.BOLD);
+//            holder.tv_station.setTextSize(20);
+//        }else if (position < selectItem){
+//            holder.tv_tag.setSelected(false);
+//            holder.tv_tag.setVisibility(View.INVISIBLE);
+//            holder.tv_station.setTypeface(Typeface.DEFAULT, 1);
+//            holder.tv_station.setTextColor(Color.GRAY);
+//            holder.tv_station.setTextSize(15);
+//        }else {
+//            holder.tv_tag.setSelected(false);
+//            holder.tv_tag.setVisibility(View.INVISIBLE);
+//            holder.tv_station.setTypeface(Typeface.DEFAULT, 1);
+//            holder.tv_station.setTextColor(Color.BLACK);
+//            holder.tv_station.setTextSize(15);
+//        }
+
+        if (busItem>0&&busItem==position){
+            holder.tv_tag.setVisibility(View.INVISIBLE);
+            holder.tv_station.setTypeface(Typeface.DEFAULT, 1);
+            holder.tv_station.setTextColor(Color.BLACK);
+            holder.tv_station.setTextSize(15);
+            holder.bus_arrive.setVisibility(View.VISIBLE);
+            holder.bus_away.setVisibility(View.GONE);
+            holder.arrow.setVisibility(View.GONE);
+        }else if (busItem<=0&&Math.abs(busItem)==position){
+            holder.tv_tag.setVisibility(View.INVISIBLE);
+            holder.bus_away.setVisibility(View.VISIBLE);
+            holder.bus_arrive.setVisibility(View.GONE);
+            holder.arrow.setVisibility(View.VISIBLE);
+            holder.tv_station.setTypeface(Typeface.DEFAULT, 1);
+            holder.tv_station.setTextColor(Color.GRAY);
+            holder.tv_station.setTextSize(15);
+        }else if (position<Math.abs(busItem)){
+            holder.tv_tag.setVisibility(View.INVISIBLE);
+            holder.tv_station.setTypeface(Typeface.DEFAULT, 1);
+            holder.tv_station.setTextColor(Color.GRAY);
+            holder.tv_station.setTextSize(15);
+            holder.bus_arrive.setVisibility(View.GONE);
+            holder.bus_away.setVisibility(View.GONE);
+            holder.arrow.setVisibility(View.VISIBLE);
+        }else if (position>Math.abs(busItem)){
+            holder.tv_tag.setVisibility(View.INVISIBLE);
+            holder.tv_station.setTypeface(Typeface.DEFAULT, 1);
+            holder.tv_station.setTextColor(Color.BLACK);
+            holder.tv_station.setTextSize(15);
+            holder.bus_arrive.setVisibility(View.GONE);
+            holder.bus_away.setVisibility(View.GONE);
+            holder.arrow.setVisibility(View.VISIBLE);
+        }
+
+        if (selectItem>=Math.abs(busItem)&&busItem>=0&&selectItem==position){
             holder.tv_tag.setSelected(true);
             holder.tv_tag.setVisibility(View.VISIBLE);
             holder.tv_station.setTextColor(Color.RED);
             holder.tv_station.setTypeface(Typeface.DEFAULT_BOLD, Typeface.BOLD);
             holder.tv_station.setTextSize(20);
-        } else if (position < selectItem){
-            holder.tv_tag.setSelected(false);
-            holder.tv_tag.setVisibility(View.INVISIBLE);
-            holder.tv_station.setTypeface(Typeface.DEFAULT, 1);
-            holder.tv_station.setTextColor(Color.GRAY);
-            holder.tv_station.setTextSize(15);
-        }else {
-            holder.tv_tag.setSelected(false);
-            holder.tv_tag.setVisibility(View.INVISIBLE);
-            holder.tv_station.setTypeface(Typeface.DEFAULT, 1);
-            holder.tv_station.setTextColor(Color.BLACK);
-            holder.tv_station.setTextSize(15);
+        }else if(busItem<0&&selectItem>Math.abs(busItem)&&selectItem==position){
+            holder.tv_tag.setSelected(true);
+            holder.tv_tag.setVisibility(View.VISIBLE);
+            holder.tv_station.setTextColor(Color.RED);
+            holder.tv_station.setTypeface(Typeface.DEFAULT_BOLD, Typeface.BOLD);
+            holder.tv_station.setTextSize(20);
         }
 
-        if (busItem>=0&&busItem==position){
-            holder.bus_arrive.setVisibility(View.VISIBLE);
-            holder.bus_away.setVisibility(View.GONE);
-            holder.arrow.setVisibility(View.GONE);
-        }else if (busItem<0&&Math.abs(busItem)==position){
-            holder.bus_away.setVisibility(View.VISIBLE);
-            holder.bus_arrive.setVisibility(View.GONE);
-            holder.arrow.setVisibility(View.VISIBLE);
-        }else {
-            holder.bus_arrive.setVisibility(View.GONE);
-            holder.bus_away.setVisibility(View.GONE);
-            holder.arrow.setVisibility(View.VISIBLE);
-        }
         //如果设置了回调，则设置点击事件
         if(mItemClickListener != null){
             holder.itemView.setOnClickListener(new View.OnClickListener() {

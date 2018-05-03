@@ -50,16 +50,20 @@
             android:value="93b2e6eb52a58e3d9daa3b56548ee80b"
             />
         <service android:name="com.amap.api.location.APSService" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MapActivity"/>
-        <activity android:name=".NoticeActivity"/>
-        <activity android:name=".OrientationActivity"/>
+        <activity android:name=".MapActivity"
+            android:launchMode="singleInstance"/>
+        <activity android:name=".NoticeActivity"
+            android:launchMode="singleInstance"/>
+        <activity android:name=".OrientationActivity"
+            android:launchMode="singleInstance"/>
     </application>
 
 </manifest>
