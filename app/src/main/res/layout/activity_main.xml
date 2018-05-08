@@ -151,20 +151,30 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/bus_line"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/Toast"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:orientation="vertical">
+        android:layout_marginTop="@dimen/activity_vertical_margin">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/line_station"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="horizontal"></android.support.v7.widget.RecyclerView>
+
+        <ImageButton
+            android:id="@+id/refresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="65dp"
+            android:layout_marginEnd="24dp"
+            android:background="@mipmap/refresh_blue"
+            android:baselineAlignBottom="true" />
 
         <!--<android.support.v7.app.AlertController.RecycleListView-->
             <!--android:id="@+id/line_station"-->
@@ -178,7 +188,7 @@
             <!--android:layout_height="wrap_content"-->
             <!--android:divider="@null"-->
             <!--android:listSelector="@android:color/transparent"></com.example.shizhuan.chelaile_ui.HorizontialListView>-->
-    </LinearLayout>
+    </RelativeLayout>
 
 
     <LinearLayout
@@ -238,5 +248,6 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="13dp"
         android:gravity="center_horizontal" />
+
 
 </RelativeLayout>

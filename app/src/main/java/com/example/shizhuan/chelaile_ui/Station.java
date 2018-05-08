@@ -1,7 +1,6 @@
 package com.example.shizhuan.chelaile_ui;
 
 
-import com.amap.api.maps2d.model.LatLng;
 import com.amap.api.services.core.LatLonPoint;
 
 import java.io.Serializable;

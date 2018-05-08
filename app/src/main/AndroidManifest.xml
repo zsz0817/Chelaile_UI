@@ -64,6 +64,8 @@
             android:launchMode="singleInstance"/>
         <activity android:name=".OrientationActivity"
             android:launchMode="singleInstance"/>
+        <activity android:name=".CustomsUpdateActivity"
+            android:theme="@style/UpdateDialog" />
     </application>
 
 </manifest>

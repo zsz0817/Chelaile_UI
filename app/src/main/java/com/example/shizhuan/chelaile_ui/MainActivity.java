@@ -1,6 +1,8 @@
 package com.example.shizhuan.chelaile_ui;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -10,6 +12,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.provider.SyncStateContract;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -55,7 +58,12 @@ import com.example.shizhuan.chelaile_ui.Utils.KyLoadingBuilder;
 import com.example.shizhuan.chelaile_ui.Utils.Utils;
 import com.example.shizhuan.chelaile_ui.entity.CloudOverlay;
 import com.example.shizhuan.chelaile_ui.http.OkHttpClientManager;
+import com.kcode.lib.UpdateWrapper;
+import com.kcode.lib.bean.VersionModel;
+import com.kcode.lib.log.L;
+import com.kcode.lib.net.CheckUpdateTask;
 import com.squareup.okhttp.Response;
+import com.tbruyelle.rxpermissions.RxPermissions;
 
 import org.json.JSONObject;
 
@@ -105,10 +113,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
     private List<Station> currentline = new ArrayList<>();
 
     private AppCompatSpinner spinner;
-    private ImageButton home,map,direction,notice;
+    private ImageButton home,map,direction,notice,refresh;
     private ProgressBar progressBar;
     private RecyclerView recyclerView;
-    private TextView time,distance;
+    private TextView time,distance,fromTo,destination;
     private MyRecyclerAdapter adapter;
     private Toolbar toolbar;
     private Intent intent;
@@ -118,10 +126,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
 
     private LinearLayoutManager mLayoutManager;
 
+    private SharedPreferences sp;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        checkUpdate(0,CustomsUpdateActivity.class);//检查更新
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        sp = getSharedPreferences("Datadefault",MODE_PRIVATE);//创建对象，Datadefault是储存数据的对象名
         new CustomThread().start();
 
         mlocationClient = new AMapLocationClient(MainActivity.this);
@@ -169,6 +183,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
      * 初始化控件
      */
     private void init(){
+
         builder = new KyLoadingBuilder(this);
         builder.setIcon(R.mipmap.loading);
         builder.setText("正在加载中...");
@@ -186,16 +201,22 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
         spinner .setAdapter(spinneradapter);
         if (application.getLine_number()!=0){
             spinner.setSelection(application.getLine_number());
+        }else if (sp.getInt("line",-1)>=0){
+            spinner.setSelection(sp.getInt("line",-1));
         }else {
             spinner.setSelection(0);
         }
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                setProgressBarVisibility(true);
+                SharedPreferences.Editor editor = sp.edit();//获取编辑对象
+                editor.putInt("line",position);//keyname是储存数据的键值名，同一个对象可以保存多个键值
+                editor.commit();//提交保存修改
                 application.setLine_number(position);
                 currentline.clear();
                 queryStations();
+                mlocationClient.startLocation();
+                adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -204,6 +225,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
             }
         });
 
+        refresh = (ImageButton)findViewById(R.id.refresh);
+        destination = (TextView)findViewById(R.id.destination);
+        fromTo = (TextView)findViewById(R.id.fromTo);
         home = (ImageButton)findViewById(R.id.home);
         map = (ImageButton)findViewById(R.id.map);
         direction = (ImageButton)findViewById(R.id.direction);
@@ -212,6 +236,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
         map.setOnClickListener(this);
         direction.setOnClickListener(this);
         notice.setOnClickListener(this);
+        refresh.setOnClickListener(this);
         toolbar = (Toolbar)findViewById(R.id.toolbar);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
@@ -308,6 +333,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
                 startActivity(intent);
                 overridePendingTransition(0, 0);
                 break;
+            case R.id.refresh:
+                mlocationClient.startLocation();
+                adapter.notifyDataSetChanged();
+                break;
         }
     }
 
@@ -346,6 +375,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
                                 return -1;
                             }
                         });
+                        fromTo.setText(currentline.get(0).getContent());
+                        destination.setText(currentline.get(currentline.size()-1).getContent());
                         adapter.notifyDataSetChanged();
                         setProgressBarVisibility(false);
                     } else {
@@ -518,6 +549,46 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
             };
             Looper.loop();//4、启动消息循环
         }
+    }
+
+    private void checkUpdate(final long time, final Class<? extends FragmentActivity> cls) {
+
+        UpdateWrapper.Builder builder = new UpdateWrapper.Builder(getApplicationContext())
+                .setTime(time)
+                .setNotificationIcon(R.mipmap.ic_launcher_round)
+                .setUrl("http://111.230.148.118:8080/update/Chelaile.json")
+                .setIsShowToast(true)
+                .setCallback(new CheckUpdateTask.Callback() {
+                    @Override
+                    public void callBack(VersionModel versionModel) {
+
+                    }
+                });
+
+        if (cls != null) {
+            builder.setCustomsActivity(cls);
+        }
+
+        builder.build().start();
+//        PermissionCompat.Builder localBuilder = new PermissionCompat.Builder(this);
+//        localBuilder.addPermissions(permissions).addRequestPermissionsCallBack(new OnRequestPermissionsCallBack()
+//        {
+//            public void onDenied(String paramAnonymousString)
+//            {
+//            }
+//
+//            public void onGrant()
+//            {
+//                UpdateWrapper.Builder localBuilder = new UpdateWrapper.Builder(MainActivity.this.getApplicationContext()).setTime(paramLong).setNotificationIcon(2130903041).setUrl("http://45.78.52.169/app/update.json");
+//                if (this.val$cls != null)
+//                    localBuilder.setCustomsActivity(this.val$cls);
+//                localBuilder.build().start();
+//            }
+//        });
+//        localBuilder.build().request();
+
+
+
     }
 
     @Override

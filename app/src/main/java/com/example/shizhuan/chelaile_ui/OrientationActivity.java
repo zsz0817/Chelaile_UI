@@ -75,7 +75,7 @@ public class OrientationActivity extends BaseActivity implements View.OnClickLis
     private static boolean isMove = false;
     private boolean isClick = false;
 
-    private ImageButton home,map,direction,notice;
+    private ImageButton home,map,direction,notice,refresh;
     private Toolbar toolbar;
     private Intent intent;
     private List<Station> currentline = new ArrayList<>();
@@ -83,7 +83,7 @@ public class OrientationActivity extends BaseActivity implements View.OnClickLis
     private AppCompatSpinner spinner;
 
     private RecyclerView recyclerView;
-    private TextView time,distance;
+    private TextView time,distance,fromTo,destination;
     private MyRecyclerAdapter adapter;
     private LinearLayoutManager mLayoutManager;
 
@@ -132,20 +132,19 @@ public class OrientationActivity extends BaseActivity implements View.OnClickLis
         mlocationClient.startLocation();
 
         application = (MyApplication)this.getApplication();
+        builder = new KyLoadingBuilder(this);
+        builder.setIcon(R.mipmap.loading);
+//builder.setOutsideTouchable(false);//点击空白区域是否关闭
+//builder.setBackTouchable(true);//按返回键是否关闭
+//builder.dismiss();//关闭
+//        builder.show();
 //        stationslist = application.getcurrentline();
         init();
     }
 
     private void init(){
-
-        builder = new KyLoadingBuilder(this);
-        builder.setIcon(R.mipmap.loading);
-        builder.setText("正在加载中...");
-//builder.setOutsideTouchable(false);//点击空白区域是否关闭
-//builder.setBackTouchable(true);//按返回键是否关闭
-//builder.dismiss();//关闭
-//        builder.show();
-
+        destination = (TextView)findViewById(R.id.destination);
+        fromTo = (TextView)findViewById(R.id.fromTo);
         time = (TextView)findViewById(R.id.time);
         distance = (TextView)findViewById(R.id.distance);
 
@@ -174,6 +173,7 @@ public class OrientationActivity extends BaseActivity implements View.OnClickLis
             }
         });
 
+        refresh = (ImageButton)findViewById(R.id.refresh);
         recyclerView = (RecyclerView) findViewById(R.id.line_station);
         home = (ImageButton)findViewById(R.id.home);
         map = (ImageButton)findViewById(R.id.map);
@@ -183,6 +183,7 @@ public class OrientationActivity extends BaseActivity implements View.OnClickLis
         map.setOnClickListener(this);
         direction.setOnClickListener(this);
         notice.setOnClickListener(this);
+        refresh.setOnClickListener(this);
         toolbar = (Toolbar)findViewById(R.id.toolbar);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
@@ -207,6 +208,7 @@ public class OrientationActivity extends BaseActivity implements View.OnClickLis
                         || (adapter.getbusItem()>=0&&Position<adapter.getbusItem())){
                     Toast.makeText(OrientationActivity.this,"班车已路过该站",Toast.LENGTH_SHORT).show();
                 }else {
+                    builder.show();
                     adapter.setSelectItem(Position);
                     SimpleDateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
                     SimpleDateFormat df2 = new SimpleDateFormat("HH:mm:ss");
@@ -292,6 +294,10 @@ public class OrientationActivity extends BaseActivity implements View.OnClickLis
                 startActivity(intent);
                 overridePendingTransition(0, 0);
                 break;
+            case R.id.refresh:
+                mlocationClient.startLocation();
+                adapter.notifyDataSetChanged();
+                break;
         }
     }
 
@@ -330,6 +336,8 @@ public class OrientationActivity extends BaseActivity implements View.OnClickLis
                                 return -1;
                             }
                         });
+                        fromTo.setText(currentline.get(0).getContent());
+                        destination.setText(currentline.get(currentline.size()-1).getContent());
                         adapter.notifyDataSetChanged();
                         builder.dismiss();
                     } else {
@@ -372,6 +380,7 @@ public class OrientationActivity extends BaseActivity implements View.OnClickLis
                     net.sf.json.JSONArray jsonArray = net.sf.json.JSONArray.fromObject(param);
                     String tmp = jsonArray.toString().substring(1,jsonArray.toString().length()-1);
                     mHandler.obtainMessage(MSG_WORLD, tmp).sendToTarget();//发送消息到CustomThread实例
+                    builder.show();
                 }catch (Exception e){
                     e.printStackTrace();
                     Toast.makeText(OrientationActivity.this,e.getMessage(),Toast.LENGTH_SHORT).show();
