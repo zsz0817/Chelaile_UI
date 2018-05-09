@@ -1,6 +1,5 @@
 package com.example.shizhuan.chelaile_ui;
 
-import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
@@ -10,7 +9,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -37,7 +35,6 @@ import com.amap.api.services.cloud.CloudResult;
 import com.amap.api.services.cloud.CloudSearch;
 import com.amap.api.services.core.AMapException;
 import com.example.shizhuan.chelaile_ui.Utils.Constants;
-import com.example.shizhuan.chelaile_ui.Utils.KyLoadingBuilder;
 import com.example.shizhuan.chelaile_ui.Utils.MyDialog;
 import com.example.shizhuan.chelaile_ui.http.OkHttpClientManager;
 import com.squareup.okhttp.Response;
