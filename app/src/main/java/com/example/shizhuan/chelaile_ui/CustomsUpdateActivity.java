@@ -12,7 +12,7 @@ public class CustomsUpdateActivity extends UpdateActivity
 {
     protected Fragment getUpdateDialogFragment()
     {
-        return CustomsUpdateFragment.newInstance(this.mModel,"发现新版本",true);
+        return CustomsUpdateFragment.newInstance(this.mModel,"",false);
 //        return super.getUpdateDialogFragment();
     }
 }

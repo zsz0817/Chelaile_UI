@@ -55,6 +55,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.example.shizhuan.chelaile_ui.Utils.Constants;
 import com.example.shizhuan.chelaile_ui.Utils.KyLoadingBuilder;
+import com.example.shizhuan.chelaile_ui.Utils.MyDialog;
 import com.example.shizhuan.chelaile_ui.Utils.Utils;
 import com.example.shizhuan.chelaile_ui.entity.CloudOverlay;
 import com.example.shizhuan.chelaile_ui.http.OkHttpClientManager;
@@ -78,6 +79,8 @@ import java.util.Map;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener,
         CloudSearch.OnCloudSearchListener,AMapLocationListener {
+
+    MyDialog dialog;
     private String current_station,nearest_station;//当前站点，最近站点
 
     //记录用户首次点击返回键的时间
@@ -122,8 +125,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
     private Intent intent;
     private Station station;
 
-    private KyLoadingBuilder builder;
-
     private LinearLayoutManager mLayoutManager;
 
     private SharedPreferences sp;
@@ -135,6 +136,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        dialog = MyDialog.showDialog(MainActivity.this);
+        dialog.show();
+
         sp = getSharedPreferences("Datadefault",MODE_PRIVATE);//创建对象，Datadefault是储存数据的对象名
         new CustomThread().start();
 
@@ -184,14 +188,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
      */
     private void init(){
 
-        builder = new KyLoadingBuilder(this);
-        builder.setIcon(R.mipmap.loading);
-        builder.setText("正在加载中...");
-//builder.setOutsideTouchable(false);//点击空白区域是否关闭
-//builder.setBackTouchable(true);//按返回键是否关闭
-//builder.dismiss();//关闭
-//        builder.show();
-        setProgressBarVisibility(true);
         time = (TextView)findViewById(R.id.time);
         distance = (TextView)findViewById(R.id.distance);
         spinner = (AppCompatSpinner)findViewById(R.id.spinner);
@@ -209,6 +205,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                dialog.show();
                 SharedPreferences.Editor editor = sp.edit();//获取编辑对象
                 editor.putInt("line",position);//keyname是储存数据的键值名，同一个对象可以保存多个键值
                 editor.commit();//提交保存修改
@@ -262,6 +259,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
                         || (adapter.getbusItem()>=0&&Position<adapter.getbusItem())){
                     Toast.makeText(MainActivity.this,"班车已路过该站",Toast.LENGTH_SHORT).show();
                 }else {
+                    dialog.show();
                     adapter.setSelectItem(Position);
                     SimpleDateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
                     SimpleDateFormat df2 = new SimpleDateFormat("HH:mm:ss");
@@ -334,6 +332,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
                 overridePendingTransition(0, 0);
                 break;
             case R.id.refresh:
+                dialog.show();
                 mlocationClient.startLocation();
                 adapter.notifyDataSetChanged();
                 break;
@@ -378,7 +377,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
                         fromTo.setText(currentline.get(0).getContent());
                         destination.setText(currentline.get(currentline.size()-1).getContent());
                         adapter.notifyDataSetChanged();
-                        setProgressBarVisibility(false);
+                        dialog.dismiss();
                     } else {
                         Toast.makeText(this, R.string.no_result,Toast.LENGTH_SHORT).show();
                     }
@@ -474,9 +473,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
                                     public void run() {
                                         time.setText(Integer.parseInt(statime)/60+"");
                                         distance.setText(stadis);
-                                        setProgressBarVisibility(false);
                                         adapter.notifyDataSetChanged();
-                                        builder.dismiss();
+                                        dialog.dismiss();
                                     }
                                 });
 //
@@ -535,8 +533,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
                                         distance.setText(stadis);
                                         adapter.setSelectItem(Integer.parseInt(line_stanum)-1);
                                         adapter.notifyDataSetChanged();
-                                        setProgressBarVisibility(false);
-                                        builder.dismiss();
+                                        dialog.dismiss();
                                     }
                                 });
 //

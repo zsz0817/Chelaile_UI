@@ -38,6 +38,7 @@ import com.amap.api.services.cloud.CloudSearch;
 import com.amap.api.services.core.AMapException;
 import com.example.shizhuan.chelaile_ui.Utils.Constants;
 import com.example.shizhuan.chelaile_ui.Utils.KyLoadingBuilder;
+import com.example.shizhuan.chelaile_ui.Utils.MyDialog;
 import com.example.shizhuan.chelaile_ui.http.OkHttpClientManager;
 import com.squareup.okhttp.Response;
 
@@ -103,12 +104,16 @@ public class OrientationActivity extends BaseActivity implements View.OnClickLis
     private ArrayList<CloudItem> mCloudItems;
     private CloudSearch.Query mQuery;
 
-    private KyLoadingBuilder builder;
+    MyDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_direction);
+
+        dialog = MyDialog.showDialog(OrientationActivity.this);
+        dialog.show();
+
         new CustomThread().start();
 
         mlocationClient = new AMapLocationClient(OrientationActivity.this);
@@ -132,13 +137,6 @@ public class OrientationActivity extends BaseActivity implements View.OnClickLis
         mlocationClient.startLocation();
 
         application = (MyApplication)this.getApplication();
-        builder = new KyLoadingBuilder(this);
-        builder.setIcon(R.mipmap.loading);
-//builder.setOutsideTouchable(false);//点击空白区域是否关闭
-//builder.setBackTouchable(true);//按返回键是否关闭
-//builder.dismiss();//关闭
-//        builder.show();
-//        stationslist = application.getcurrentline();
         init();
     }
 
@@ -162,6 +160,7 @@ public class OrientationActivity extends BaseActivity implements View.OnClickLis
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                dialog.show();
                 application.setLine_number(position);
                 currentline.clear();
                 queryStations();
@@ -208,7 +207,7 @@ public class OrientationActivity extends BaseActivity implements View.OnClickLis
                         || (adapter.getbusItem()>=0&&Position<adapter.getbusItem())){
                     Toast.makeText(OrientationActivity.this,"班车已路过该站",Toast.LENGTH_SHORT).show();
                 }else {
-                    builder.show();
+                    dialog.show();
                     adapter.setSelectItem(Position);
                     SimpleDateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
                     SimpleDateFormat df2 = new SimpleDateFormat("HH:mm:ss");
@@ -295,6 +294,7 @@ public class OrientationActivity extends BaseActivity implements View.OnClickLis
                 overridePendingTransition(0, 0);
                 break;
             case R.id.refresh:
+                dialog.show();
                 mlocationClient.startLocation();
                 adapter.notifyDataSetChanged();
                 break;
@@ -339,7 +339,7 @@ public class OrientationActivity extends BaseActivity implements View.OnClickLis
                         fromTo.setText(currentline.get(0).getContent());
                         destination.setText(currentline.get(currentline.size()-1).getContent());
                         adapter.notifyDataSetChanged();
-                        builder.dismiss();
+                        dialog.dismiss();
                     } else {
                         Toast.makeText(this, R.string.no_result,Toast.LENGTH_SHORT).show();
                     }
@@ -380,7 +380,6 @@ public class OrientationActivity extends BaseActivity implements View.OnClickLis
                     net.sf.json.JSONArray jsonArray = net.sf.json.JSONArray.fromObject(param);
                     String tmp = jsonArray.toString().substring(1,jsonArray.toString().length()-1);
                     mHandler.obtainMessage(MSG_WORLD, tmp).sendToTarget();//发送消息到CustomThread实例
-                    builder.show();
                 }catch (Exception e){
                     e.printStackTrace();
                     Toast.makeText(OrientationActivity.this,e.getMessage(),Toast.LENGTH_SHORT).show();
@@ -437,7 +436,7 @@ public class OrientationActivity extends BaseActivity implements View.OnClickLis
                                         time.setText(Integer.parseInt(statime)/60+"");
                                         distance.setText(stadis);
                                         adapter.notifyDataSetChanged();
-                                        builder.dismiss();
+                                        dialog.dismiss();
                                     }
                                 });
 //
@@ -496,7 +495,7 @@ public class OrientationActivity extends BaseActivity implements View.OnClickLis
                                         distance.setText(stadis);
                                         adapter.setSelectItem(Integer.parseInt(line_stanum)-1);
                                         adapter.notifyDataSetChanged();
-                                        builder.dismiss();
+                                        dialog.dismiss();
                                     }
                                 });
 //
