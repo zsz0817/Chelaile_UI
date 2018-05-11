@@ -35,7 +35,8 @@ import com.amap.api.services.cloud.CloudResult;
 import com.amap.api.services.cloud.CloudSearch;
 import com.amap.api.services.core.AMapException;
 import com.example.shizhuan.chelaile_ui.Utils.Constants;
-import com.example.shizhuan.chelaile_ui.Utils.MyDialog;
+import com.example.shizhuan.chelaile_ui.entity.MyDialog;
+import com.example.shizhuan.chelaile_ui.entity.Station;
 import com.example.shizhuan.chelaile_ui.http.OkHttpClientManager;
 import com.squareup.okhttp.Response;
 
@@ -420,10 +421,13 @@ public class OrientationActivity extends BaseActivity implements View.OnClickLis
                                 final String distance_value = body.getString("bus_nextdis");//到下一站的距离
                                 final String stadis = body.getString("stadis");//到所选站点的距离
                                 final String statime = body.getString("statime");//到所选站点的时间
-                                if (Integer.parseInt(laststation)==Integer.parseInt(nextstation)){
+                                adapter.setnextstation(Integer.parseInt(nextstation));
+                                if (Integer.parseInt(laststation)==0 && Integer.parseInt(nextstation)==0){
+                                    adapter.setbusItem(0);
+                                } else if (Integer.parseInt(laststation)==Integer.parseInt(nextstation)){
                                     adapter.setbusItem(Integer.parseInt(laststation)-1);
                                 }else {
-                                    adapter.setbusItem(1-Integer.parseInt(laststation));
+                                    adapter.setbusItem(2-Integer.parseInt(nextstation));
                                 }
 
                                 LatLng newLatLng = new LatLng(latitude, longitude);
@@ -479,10 +483,13 @@ public class OrientationActivity extends BaseActivity implements View.OnClickLis
                                 final String distance_value = body.getString("bus_nextdis");//到下一站的距离
                                 final String stadis = body.getString("stadis");//到所选站点的距离
                                 final String statime = body.getString("statime");//到所选站点的时间
-                                if (Integer.parseInt(laststation)==Integer.parseInt(nextstation)){
+                                adapter.setnextstation(Integer.parseInt(nextstation));
+                                if (Integer.parseInt(laststation)==0 && Integer.parseInt(nextstation)==0){
+                                    adapter.setbusItem(0);
+                                } else if (Integer.parseInt(laststation)==Integer.parseInt(nextstation)){
                                     adapter.setbusItem(Integer.parseInt(laststation)-1);
                                 }else {
-                                    adapter.setbusItem(1-Integer.parseInt(laststation));
+                                    adapter.setbusItem(2-Integer.parseInt(nextstation));
                                 }
 
                                 runOnUiThread(new Runnable() {

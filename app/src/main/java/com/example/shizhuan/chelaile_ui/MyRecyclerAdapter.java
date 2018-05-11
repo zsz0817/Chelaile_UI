@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.shizhuan.chelaile_ui.entity.Station;
+
 import java.util.List;
 
 /**
@@ -23,6 +25,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.My
     private OnItemClickListener mItemClickListener;
     private int selectItem = -1;
     private int busItem = 0;
+    private int nextstation = 0;
 
     private List<Boolean> isClicks;//控件是否被点击,默认为false，如果被点击，改变值，控件根据值改变自身颜色
 
@@ -46,6 +49,14 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.My
     public int getItemCount() {
         // TODO Auto-generated method stub
         return mDatas.size();
+    }
+
+    public void setnextstation(int nextstation) {
+        this.nextstation = nextstation;
+    }
+
+    public int getnextstation(){
+        return nextstation;
     }
 
     public void setbusItem(int busItem) {
@@ -89,7 +100,25 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.My
 //            holder.tv_station.setTextSize(15);
 //        }
 
-        if (busItem>0&&busItem==position){
+        if (busItem==0 && position==0){
+            if (nextstation==2){
+                holder.tv_tag.setVisibility(View.INVISIBLE);
+                holder.tv_station.setTypeface(Typeface.DEFAULT, 1);
+                holder.tv_station.setTextColor(Color.BLACK);
+                holder.tv_station.setTextSize(15);
+                holder.bus_arrive.setVisibility(View.GONE);
+                holder.bus_away.setVisibility(View.VISIBLE);
+                holder.arrow.setVisibility(View.VISIBLE);
+            }else{
+                holder.tv_tag.setVisibility(View.INVISIBLE);
+                holder.tv_station.setTypeface(Typeface.DEFAULT, 1);
+                holder.tv_station.setTextColor(Color.BLACK);
+                holder.tv_station.setTextSize(15);
+                holder.bus_arrive.setVisibility(View.VISIBLE);
+                holder.bus_away.setVisibility(View.GONE);
+                holder.arrow.setVisibility(View.GONE);
+            }
+        }else if (busItem>0&&busItem==position){
             holder.tv_tag.setVisibility(View.INVISIBLE);
             holder.tv_station.setTypeface(Typeface.DEFAULT, 1);
             holder.tv_station.setTextColor(Color.BLACK);
@@ -97,7 +126,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.My
             holder.bus_arrive.setVisibility(View.VISIBLE);
             holder.bus_away.setVisibility(View.GONE);
             holder.arrow.setVisibility(View.GONE);
-        }else if (busItem<=0&&Math.abs(busItem)==position){
+        }else if (busItem<0&&Math.abs(busItem)==position){
             holder.tv_tag.setVisibility(View.INVISIBLE);
             holder.bus_away.setVisibility(View.VISIBLE);
             holder.bus_arrive.setVisibility(View.GONE);

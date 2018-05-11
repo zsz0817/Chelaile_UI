@@ -1,4 +1,4 @@
-package com.example.shizhuan.chelaile_ui.Utils;
+package com.example.shizhuan.chelaile_ui.entity;
 
 import android.app.Dialog;
 import android.content.Context;

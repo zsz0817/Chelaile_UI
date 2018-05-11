@@ -62,7 +62,6 @@ dependencies {
     implementation files('libs/AMap_Search_V5.5.0_20171107.jar')
     compile 'com.squareup.okhttp:okhttp:2.7.5'
     compile 'com.android.support:recyclerview-v7:26.1.0'
-    compile 'com.mcxiaoke.volley:library:1.0.+@aar'
     compile 'com.github.fccaikai:AppUpdate:2.1.4'
     compile 'com.tbruyelle.rxpermissions:rxpermissions:0.9.3@aar'
 }

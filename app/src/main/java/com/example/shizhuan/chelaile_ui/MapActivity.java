@@ -8,7 +8,6 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -46,6 +45,7 @@ import com.amap.api.services.cloud.CloudSearch;
 import com.amap.api.services.core.AMapException;
 import com.autonavi.tbt.TrafficFacilityInfo;
 import com.example.shizhuan.chelaile_ui.Utils.Constants;
+import com.example.shizhuan.chelaile_ui.entity.Station;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -54,7 +54,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by ShiZhuan on 2018/4/24.
